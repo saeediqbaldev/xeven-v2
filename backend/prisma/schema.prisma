@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SEO
+  CONTENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String?  @unique
+  passwordHash String
+  role         Role     @default(CONTENT)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+// One row per locale-variant of a page (home, about, consultancy, contact, legal, sitemap)
+model Page {
+  id        String    @id @default(cuid())
+  slug      String    // e.g. "home", "about", "privacy-policy"
+  locale    String    @default("en")
+  title     String
+  blocks    Json      // ordered array of content blocks (hero, grid, cta, etc.)
+  seo       SeoMeta?
+  status    String    @default("draft") // draft | published
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([slug, locale])
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  slug          String    // branding | website-design | seo | content-writing | social-media | website-maintenance
+  locale        String    @default("en")
+  name          String
+  summary       String
+  who           String
+  what          String
+  when          String
+  where         String
+  why           String
+  workSamples   Json      // array of { title, image, url }
+  order         Int       @default(0)
+  seo           SeoMeta?
+  status        String    @default("draft")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  caseStudies   CaseStudy[]
+  testimonials  Testimonial[]
+
+  @@unique([slug, locale])
+}
+
+model CaseStudy {
+  id          String   @id @default(cuid())
+  slug        String
+  locale      String   @default("en")
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+  clientName  String
+  challenge   String
+  strategy    String
+  execution   String
+  results     Json     // array of { metric, value }
+  gallery     Json      // array of image URLs
+  seo         SeoMeta?
+  status      String   @default("draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([slug, locale])
+}
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  clientName String
+  clientRole String?
+  quote      String?
+  videoUrl   String?
+  rating     Int?     @default(5)
+  featured   Boolean  @default(false)
+  serviceId  String?
+  service    Service? @relation(fields: [serviceId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  photo     String?
+  bio       String?
+  socials   Json?
+  order     Int      @default(0)
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  source    String   // "contact" | "landing" | "consultancy"
+  name      String
+  email     String
+  phone     String?
+  service   String?
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+model SeoMeta {
+  id              String   @id @default(cuid())
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  ogImage         String?
+  ogTitle         String?
+  ogDescription   String?
+  twitterCard     String?
+  schemaJson      Json?
+  categories      Json?
+  page            Page?      @relation(fields: [pageId], references: [id])
+  pageId          String?    @unique
+  service         Service?   @relation(fields: [serviceId], references: [id])
+  serviceId       String?    @unique
+  caseStudy       CaseStudy? @relation(fields: [caseStudyId], references: [id])
+  caseStudyId     String?    @unique
+}
+
+model ThemeSetting {
+  id              String   @id @default(cuid())
+  key             String   @unique // "active" — singleton row for now
+  fontHeading     String   @default("Space Grotesk")
+  fontBody        String   @default("Inter")
+  colorBrand      String   @default("#5B5FEF")
+  colorAccent     String   @default("#FF6B4A")
+  animationsMode  String   @default("full") // full | reduced | off
+  updatedAt       DateTime @updatedAt
+}
+
+model SiteSetting {
+  id                 String   @id @default(cuid())
+  key                String   @unique
+  value              Json
+  updatedAt          DateTime @updatedAt
+}

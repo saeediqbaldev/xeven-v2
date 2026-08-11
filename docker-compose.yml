@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: xeven
+      POSTGRES_PASSWORD: xeven
+      POSTGRES_DB: xevenpixels
+    volumes:
+      - xeven_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://xeven:xeven@db:5432/xevenpixels?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-Saeeddev307127}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL:-http://backend:4000/graphql}
+    ports:
+      - "3000:3000"
+
+volumes:
+  xeven_db_data:
