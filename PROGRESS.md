@@ -17,17 +17,35 @@
   graceful placeholder fallback on empty DB
 - Admin login page wired to `login` mutation
 
-## 🔜 Phase 2 — Core public pages (next)
-- About, Services hub + 6 service subpages (branding, website-design, seo,
-  content-writing, social-media, website-maintenance)
-- Wire each subpage to `service(slug)` query, 5W content blocks
+## ✅ Phase 2 — Core public pages (done)
+- About page: history timeline, mission, expertise tags, team grid
+  (wired to `teamMembers` query, placeholder fallback)
+- Services hub page: grid of all 6 services, wired to `services` query
+- Dynamic `services/[slug]` template: handles all 6 service subpages from
+  one file, 5W content blocks, work samples, related case studies,
+  testimonials, and CTAs — wired to `service(slug)` query with graceful
+  fallback to `frontend/data/services.ts` content
+- Backend seed script now seeds all 6 services with real 5W copy, so a
+  fresh deploy has working service pages immediately (no empty CMS state)
 
-## 🔜 Phase 3
-- Case Studies archive + dynamic `[slug]` page, 6 seeded sample case studies
-- Testimonials page (grid/slider, video embeds)
-- Consultancy page + Cal.com embed
-- Contact page (form → submitLead, Google Maps embed)
-- Legal pages (privacy/terms/refund/work-agreement) + human sitemap page
+## ✅ Phase 3 (done)
+- Case Studies archive page (filterable by service via `serviceId`) +
+  dynamic `case-studies/[slug]` detail template (challenge/strategy/
+  execution, results strip, gallery, CTA)
+- Backend seed now includes 6 sample case studies, one per service
+- Testimonials page — video testimonials (iframe embeds) + text grid with
+  star ratings, wired to `testimonials` query
+- Consultancy page — Cal.com inline embed (env-configurable link), FAQ
+  accordion; Cal.com event-type settings handle Google Meet/Zoom location
+  choice natively inside the embed
+- Contact page — enquiry form, social handles, Google Maps iframe embed
+- `/api/leads` route bridges HTML form posts (Home + Contact) to the
+  `submitLead` GraphQL mutation
+- Legal pages: dynamic `legal/[slug]` template + standard boilerplate
+  content for Privacy Policy, Terms & Conditions, Refund & Cancellation,
+  Work Agreement (see note in data/legal.ts — template only, not legal advice)
+- Human-readable `/sitemap` page + machine-readable `/sitemap.xml` via
+  Next's `app/sitemap.ts` convention
 
 ## 🔜 Phase 4 — Admin dashboard
 - Authenticated `/admin` shell (shadcn/ui), route guard via JWT + role

@@ -136,6 +136,7 @@ export default async function HomePage() {
             action="/api/leads"
             method="POST"
           >
+            <input type="hidden" name="source" value="landing" />
             <input
               name="name"
               placeholder="Your name"
