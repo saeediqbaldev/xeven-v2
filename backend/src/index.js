@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@as-integrations/express5";
+import { expressMiddleware } from "@as-integrations/express4";
 import { PrismaClient } from "@prisma/client";
 import { typeDefs } from "./schema.graphql.js";
 import { resolvers } from "./resolvers.js";
