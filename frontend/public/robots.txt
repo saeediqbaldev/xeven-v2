@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://xevenpixels.com/sitemap.xml
